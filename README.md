@@ -1,6 +1,6 @@
-# herdr-dial
+# SpeedDial
 
-A desk dial for your coding agents. It shows every [herdr](https://herdr.dev) agent at a glance, buzzes when one needs you, and jumps you straight to it.
+SpeedDial is a desk dial for your coding agents. It shows every [herdr](https://herdr.dev) agent at a glance, buzzes when one needs you, and jumps you straight to it.
 
 It runs on the [Waveshare ESP32-S3-Knob-Touch-LCD-1.8](https://www.waveshare.com/esp32-s3-knob-touch-lcd-1.8.htm), a round touchscreen with a knob, a haptic motor and a battery. It connects to your PC over USB or Bluetooth.
 
