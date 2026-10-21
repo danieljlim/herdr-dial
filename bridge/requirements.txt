@@ -1,0 +1,4 @@
+pyserial==3.5
+bleak==0.22.3
+pystray==0.19.5
+pillow==11.3.0
