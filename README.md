@@ -76,8 +76,8 @@ The board's USB-C port connects to one of two chips, depending on which way roun
 ### 2. Run the bridge
 
 ```powershell
-.venv\Scripts\python bridge\agent_view_bridge.py            # finds the knob over USB and Bluetooth
-.venv\Scripts\python bridge\agent_view_bridge.py --dry-run  # just print what would be sent
+.venv\Scripts\python bridge\speeddial_bridge.py            # finds the knob over USB and Bluetooth
+.venv\Scripts\python bridge\speeddial_bridge.py --dry-run  # just print what would be sent
 ```
 
 | Option | What it does |
@@ -124,7 +124,7 @@ To pin the bridge to your knob, pass `--ble-address`. The bridge prints the addr
 
 - **No fuel gauge:** the board doesn't have one, so the percentage is estimated from the system rail voltage.
 - **On USB power:** the charger holds that rail above any cell voltage, so the knob shows a charging bolt and the percentage only appears once it's running on battery.
-- **Low battery:** below 15% the indicator turns red, the motor buzzes once, and herdr shows an "agent-view battery low" notification.
+- **Low battery:** below 15% the indicator turns red, the motor buzzes once, and herdr shows an "SpeedDial battery low" notification.
 
 Power saving in the default build:
 
@@ -151,7 +151,7 @@ It prints each on-battery run with its drain rate and projected runtime. Runs of
 
 ### The second chip
 
-The board has a second ESP32, which drives the audio DAC and a second encoder. agent-view doesn't use it.
+The board has a second ESP32, which drives the audio DAC and a second encoder. SpeedDial doesn't use it.
 
 `esp32-sleep/` holds firmware that keeps that chip in deep sleep, which saves a little battery. To flash it, plug in the USB-C cable the other way round, so that a CH340 serial port appears:
 
@@ -165,7 +165,7 @@ To put the factory image back, use Waveshare's demo package: it's at `Firmware/E
 
 ```
 bridge/
-  agent_view_bridge.py   herdr <-> knob relay: polling, links, heartbeats, battery log
+  speeddial_bridge.py   herdr <-> knob relay: polling, links, heartbeats, battery log
   window_focus.py        brings the terminal running herdr to the front
   tray.py                system tray icon and menu
   dial_popup.py          the desktop copy of the dial

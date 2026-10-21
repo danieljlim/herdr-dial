@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define MAX_AGENTS 16  // must match MAX_AGENTS in bridge/agent_view_bridge.py
+#define MAX_AGENTS 16  // must match MAX_AGENTS in bridge/speeddial_bridge.py
 
 enum AgentStatus : uint8_t {
     STATUS_UNKNOWN,

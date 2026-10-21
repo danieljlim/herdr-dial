@@ -12,7 +12,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
-$shortcut = Join-Path ([Environment]::GetFolderPath("Startup")) "agent-view bridge.lnk"
+$shortcut = Join-Path ([Environment]::GetFolderPath("Startup")) "SpeedDial bridge.lnk"
 
 if ($Uninstall) {
     Remove-Item $shortcut -ErrorAction SilentlyContinue
@@ -25,12 +25,12 @@ if (-not (Test-Path $pythonw)) {
     throw "No virtualenv at $repo\.venv. Run the setup steps in README.md first."
 }
 
-$script = Join-Path $repo "bridge\agent_view_bridge.py"
+$script = Join-Path $repo "bridge\speeddial_bridge.py"
 $link = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut)
 $link.TargetPath = $pythonw
 $link.Arguments = "`"$script`" $Arguments".Trim()
 $link.WorkingDirectory = $repo
-$link.Description = "agent-view bridge"
+$link.Description = "SpeedDial bridge"
 $link.Save()
 Write-Host "Added $shortcut"
 

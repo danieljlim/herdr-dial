@@ -61,14 +61,14 @@ def _draw_icon(agents, offline):
 
 def _summary(agents, error):
     if error:
-        return f"agent-view: {error}"
+        return f"SpeedDial: {error}"
     if not agents:
-        return "agent-view: no agents"
+        return "SpeedDial: no agents"
     counts = {}
     for agent in agents:
         counts[agent["s"]] = counts.get(agent["s"], 0) + 1
     parts = [f"{counts[s]} {STATUS_LABELS[s]}" for s in URGENCY if counts.get(s)]
-    return "agent-view: " + ", ".join(parts)  # Windows truncates tooltips at 127 characters
+    return "SpeedDial: " + ", ".join(parts)  # Windows truncates tooltips at 127 characters
 
 
 def _menu_name(agent):
@@ -88,7 +88,7 @@ class TrayView:
         self._requests = queue.Queue()
         self._on_quit = on_quit
         self._popup = DialPopup(on_focus=self._requests.put)
-        self._icon = pystray.Icon("agent-view", _draw_icon([], True), "agent-view: starting",
+        self._icon = pystray.Icon("speeddial", _draw_icon([], True), "SpeedDial: starting",
                                   menu=pystray.Menu(self._menu_items))
         threading.Thread(target=self._icon.run, daemon=True).start()
 
@@ -131,4 +131,4 @@ class TrayView:
                 yield pystray.MenuItem(f"{label.upper()}  {_menu_name(agent)}{marker}",
                                        self._focus_action(agent["id"]))
         yield pystray.Menu.SEPARATOR
-        yield pystray.MenuItem("Quit agent-view bridge", lambda icon, item: self._on_quit())
+        yield pystray.MenuItem("Quit SpeedDial", lambda icon, item: self._on_quit())

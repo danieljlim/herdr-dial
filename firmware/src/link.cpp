@@ -8,8 +8,8 @@
 #include "driver/usb_serial_jtag.h"
 #include "freertos/stream_buffer.h"
 
-// Must match bridge/agent_view_bridge.py.
-#define BLE_DEVICE_NAME "agent-view"
+// Must match bridge/speeddial_bridge.py.
+#define BLE_DEVICE_NAME "SpeedDial"
 #define BLE_SERVICE_UUID "8b5b0001-6a3e-4c55-9d1e-6f1c2a7d3e90"
 #define BLE_RX_UUID      "8b5b0002-6a3e-4c55-9d1e-6f1c2a7d3e90"  // bridge -> device, write
 #define BLE_TX_UUID      "8b5b0003-6a3e-4c55-9d1e-6f1c2a7d3e90"  // device -> bridge, notify

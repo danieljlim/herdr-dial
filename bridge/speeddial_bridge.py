@@ -1,4 +1,4 @@
-"""Relay herdr agent state to the agent-view knob over USB serial or Bluetooth LE.
+"""Relay herdr agent state to the SpeedDial knob over USB serial or Bluetooth LE.
 
 herdr only listens on a local socket (a named pipe on Windows), so this bridge
 runs on the same machine, polls `agent.list`, and streams compact snapshots to
@@ -103,7 +103,7 @@ class Herdr:
         if self._conn is None:
             self._connect()
         self._seq += 1
-        req_id = f"agent-view-{self._seq}"
+        req_id = f"speeddial-{self._seq}"
         self._conn.write(json.dumps({"id": req_id, "method": method, "params": params}).encode() + b"\n")
         while True:
             msg = json.loads(self._readline())
@@ -205,7 +205,7 @@ class BatteryWatch:
         if low and not self.low:
             try:
                 herdr.request("notification.show", {
-                    "title": "agent-view battery low",
+                    "title": "SpeedDial battery low",
                     "body": f"{percent}% left. Plug in the knob.",
                     "sound": "request",
                 })
@@ -492,7 +492,7 @@ def claim_single_instance():
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
     kernel32.CreateMutexW.restype = ctypes.c_void_p
     # Kept for the life of the process; Windows releases it when we exit.
-    claim_single_instance.handle = kernel32.CreateMutexW(None, False, "Local\\agent-view-bridge")
+    claim_single_instance.handle = kernel32.CreateMutexW(None, False, "Local\\speeddial-bridge")
     return ctypes.get_last_error() != ERROR_ALREADY_EXISTS
 
 
@@ -518,7 +518,7 @@ def main():
             run_dry(herdr, args.interval)
             return 0
         if not claim_single_instance():
-            log("another agent-view bridge is already running; exiting")
+            log("another SpeedDial bridge is already running; exiting")
             return 0
         links = []
         if args.transport in ("auto", "usb"):

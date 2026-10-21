@@ -1,4 +1,4 @@
-// agent-view: a herdr agent dial. Talks newline-delimited JSON to bridge/agent_view_bridge.py
+// SpeedDial: a herdr agent dial. Talks newline-delimited JSON to bridge/speeddial_bridge.py
 // over USB serial or Bluetooth LE (see link.h).
 //
 //   bridge -> device  {"t":"agents","a":[{"id":"w1:p2","n":"title","k":"claude","s":"blocked","f":0}],"e":"..."}
