@@ -7,7 +7,20 @@
 #include "board.h"
 #include "lvgl.h"
 
+// Custom fonts come from firmware/tools/make_fonts.py; without them, LVGL's built-in Montserrat.
+#if __has_include("fonts/speeddial_fonts.h")
+#include "fonts/speeddial_fonts.h"
+#define SUMMARY_SEP " \xC2\xB7 "  // middle dot, which the generated fonts include
+#else
+#define FONT_STATUS (&lv_font_montserrat_28)
+#define FONT_NAME (&lv_font_montserrat_20)
+#define FONT_SMALL (&lv_font_montserrat_14)
+#define FONT_MONO (&lv_font_montserrat_14)
+#define SUMMARY_SEP ", "
+#endif
+
 #define RING_SIZE 352
+#define SUMMARY_WIDTH 220  // what fits inside the ring at the summary's height
 #define ARC_WIDTH 10
 #define ARC_WIDTH_SELECTED 22
 #define ARC_GAP_DEG 4
@@ -80,6 +93,20 @@ static void show_message(const char *title, const char *body)
     lv_label_set_text(s_hint, "");
 }
 
+// Adds "N label" to the summary, in urgency order, unless it would overflow the line. With a wide
+// font all three counts don't always fit; the least urgent one then drops off (the ring still shows it).
+static void append_if_fits(char *summary, size_t size, int count, const char *label)
+{
+    if (!count) {
+        return;
+    }
+    char candidate[64];
+    snprintf(candidate, sizeof(candidate), "%s%s%d %s", summary, summary[0] ? SUMMARY_SEP : "", count, label);
+    if (lv_txt_get_width(candidate, strlen(candidate), FONT_SMALL, 0, LV_TEXT_FLAG_NONE) <= SUMMARY_WIDTH) {
+        strlcpy(summary, candidate, size);
+    }
+}
+
 static void render(void)
 {
     if (s_offline) {
@@ -117,11 +144,12 @@ static void render(void)
         lv_obj_set_style_arc_opa(arc, selected ? LV_OPA_COVER : LV_OPA_60, LV_PART_INDICATOR);
     }
 
-    char summary[64];
-    int len = snprintf(summary, sizeof(summary), "%d agent%s", s_count, s_count == 1 ? "" : "s");
-    if (blocked) len += snprintf(summary + len, sizeof(summary) - len, ", %d blocked", blocked);
-    if (done) len += snprintf(summary + len, sizeof(summary) - len, ", %d done", done);
-    if (working) snprintf(summary + len, sizeof(summary) - len, ", %d working", working);
+    // Idle agents are left out: the summary is about what's happening, and it has to fit the circle.
+    char summary[64] = "";
+    append_if_fits(summary, sizeof(summary), blocked, "blocked");
+    append_if_fits(summary, sizeof(summary), done, "done");
+    append_if_fits(summary, sizeof(summary), working, "working");
+    if (!summary[0]) snprintf(summary, sizeof(summary), "%d idle", s_count);
     lv_label_set_text(s_summary, summary);
 
     const Agent &sel = s_agents[s_selected];
@@ -162,17 +190,17 @@ void ui_init(void (*on_tap)(const char *agent_id))
         s_arcs[i] = arc;
     }
 
-    s_status_bar = make_label(&lv_font_montserrat_14, -138, 120);
+    s_status_bar = make_label(FONT_MONO, -138, 120);
     lv_obj_set_style_text_color(s_status_bar, lv_color_hex(0x6B7280), 0);
-    s_summary = make_label(&lv_font_montserrat_14, -110, 220);
+    s_summary = make_label(FONT_SMALL, -110, SUMMARY_WIDTH);
     lv_obj_set_style_text_color(s_summary, lv_color_hex(0x9CA3AF), 0);
-    s_status = make_label(&lv_font_montserrat_28, -62, 260);
-    s_name = make_label(&lv_font_montserrat_20, 4, 250);
+    s_status = make_label(FONT_STATUS, -62, 260);
+    s_name = make_label(FONT_NAME, 4, 250);
     lv_label_set_long_mode(s_name, LV_LABEL_LONG_DOT);
-    lv_obj_set_height(s_name, 3 * lv_font_get_line_height(&lv_font_montserrat_20));
-    s_meta = make_label(&lv_font_montserrat_14, 72, 220);
+    lv_obj_set_height(s_name, 3 * lv_font_get_line_height(FONT_NAME));
+    s_meta = make_label(FONT_MONO, 72, 220);
     lv_obj_set_style_text_color(s_meta, lv_color_hex(0x9CA3AF), 0);
-    s_hint = make_label(&lv_font_montserrat_14, 108, 200);
+    s_hint = make_label(FONT_SMALL, 108, 200);
     lv_obj_set_style_text_color(s_hint, lv_color_hex(0x6B7280), 0);
 
     render();

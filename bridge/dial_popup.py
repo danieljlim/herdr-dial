@@ -36,14 +36,24 @@ TEXT = (237, 235, 230)
 MUTED = (156, 163, 175)
 DIM = (107, 114, 128)
 
-FONT_DIR = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
+# IBM Plex Mono, the knob's typeface (bundled in firmware/fonts/), falling back to Segoe UI.
+FONT_DIRS = [os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "firmware", "fonts"),
+             os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")]
+FONTS = {
+    "status": ["IBMPlexMono-SemiBold.ttf", "segoeuib.ttf"],
+    "text": ["IBMPlexMono-Regular.ttf", "segoeui.ttf"],
+    "mono": ["IBMPlexMono-Regular.ttf", "segoeui.ttf"],
+}
 
 
-def _font(name, size):
-    try:
-        return ImageFont.truetype(os.path.join(FONT_DIR, name), size)
-    except OSError:
-        return ImageFont.load_default(size)
+def _font(role, size):
+    for name in FONTS[role]:
+        for directory in FONT_DIRS:
+            try:
+                return ImageFont.truetype(os.path.join(directory, name), size)
+            except OSError:
+                pass
+    return ImageFont.load_default(size)
 
 
 def _wrap(draw, text, font, width, max_lines):
@@ -98,9 +108,9 @@ def render(agents, error, selected, scale):
     def text(y, value, font, fill):
         draw.text((centre, y * scale), value, font=font, fill=fill, anchor="mm")
 
-    small = _font("segoeui.ttf", round(13 * scale))
+    small = _font("text", round(13 * scale))
     if error or not agents:
-        text(SIZE / 2 - 22, "NO HERDR" if error else "NO AGENTS", _font("segoeuib.ttf", round(24 * scale)), MUTED)
+        text(SIZE / 2 - 22, "NO HERDR" if error else "NO AGENTS", _font("status", round(22 * scale)), MUTED)
         text(SIZE / 2 + 12, error or "Start an agent in herdr", small, DIM)
         return image
 
@@ -109,21 +119,25 @@ def render(agents, error, selected, scale):
         counts[agent["s"]] = counts.get(agent["s"], 0) + 1
     # Idle agents are left out: the summary is about what's happening, and it has to fit the circle.
     summary = " · ".join(f"{counts[s]} {STATUS_LABELS[s]}" for s in URGENCY if counts.get(s) and s != "idle")
-    text(74, summary or f"{len(agents)} idle", _font("segoeui.ttf", round(12 * scale)), MUTED)
+    summary = summary or f"{len(agents)} idle"
+    size = 12
+    while size > 8 and draw.textlength(summary, font=_font("text", round(size * scale))) > 210 * scale:
+        size -= 1  # a monospace font needs a smaller size to fit all three counts inside the ring
+    text(74, summary, _font("text", round(size * scale)), MUTED)
 
     agent = agents[selected]
     status = agent["s"]
-    text(108, STATUS_LABELS.get(status, "unknown").upper(), _font("segoeuib.ttf", round(26 * scale)),
+    text(108, STATUS_LABELS.get(status, "unknown").upper(), _font("status", round(24 * scale)),
          STATUS_COLOURS.get(status, UNKNOWN_COLOUR))
 
-    title_font = _font("segoeui.ttf", round(17 * scale))
+    title_font = _font("text", round(17 * scale))
     lines = _wrap(draw, agent["n"] or agent["id"], title_font, 210 * scale, 3)
     line_height = 22
     top = 166 - (len(lines) - 1) * line_height / 2
     for i, line in enumerate(lines):
         text(top + i * line_height, line, title_font, TEXT)
 
-    text(226, f"{agent['k'] or 'agent'}  {selected + 1}/{len(agents)}", small, MUTED)
+    text(226, f"{agent['k'] or 'agent'}  {selected + 1}/{len(agents)}", _font("mono", round(12 * scale)), MUTED)
     text(252, "on screen" if agent.get("f") else "click to show", small, DIM)
     return image
 

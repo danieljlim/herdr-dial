@@ -73,6 +73,8 @@ The board's USB-C port connects to one of two chips, depending on which way roun
 - **Upload doesn't start:** hold BOOT while you plug the board in.
 - **Knob moves the wrong way:** if turning it clockwise moves the selection backwards, flip `KNOB_DIRECTION` in `firmware/src/main.cpp`.
 
+**Fonts.** The knob and the desktop dial use [IBM Plex Mono](https://github.com/IBM/plex), bundled in `firmware/fonts/` with its licence. The converted LVGL fonts are already in `firmware/src/fonts/`. To change sizes or add glyphs, edit `firmware/tools/make_fonts.py` and run it (it needs Node.js).
+
 ### 2. Run the bridge
 
 ```powershell
